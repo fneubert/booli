@@ -24,8 +24,7 @@ def get_booli_data():
     'Intel Mac OS X 10_14_3) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 72.0.3626.96 Safari / 537.36'
         }
 
-    print('hej')
-    req = session.get(URL, header=authentication_data)
+    req = session.get(URL, headers=authentication_data)
 
     if req.status_code != requests.codes.ok:
         print('fail')
@@ -39,5 +38,4 @@ def get_booli_data():
 def create_charts():
     return
 
-if __name__ == "main":
-    booli_data = get_booli_data()
+booli_data = get_booli_data()
