@@ -1,12 +1,21 @@
 import requests
-import json
 import numpy as np
 import pandas as pd
+from pandas.io.json import json_normalize
+from datetime import date
+import plotly.graph_objs as go
 import plotly
+from plotly.offline import plot
+plotly.tools.set_credentials_file(username='fneubert', api_key='mHBK7EcgD17bpZfWyvbt')
 
 
-def get_booli_data():
-    URL = 'http://www.snittpris.se/backend/?id=MTQz&minSoldDate=20170310&maxSoldDate=20190310&minFloor=&maxFloor=%27&minLivingArea=&maxLivingArea=&minRooms=&maxRooms=&objectType=VmlsbGEsTMOkZ2VuaGV0LEfDpXJkLFRvbXQtbWFyayxGcml0aWRzaHVzLFBhcmh1cyxLZWRqZWh1cw==&offset=0'
+
+mapbox_access_token = 'pk.eyJ1IjoiZm5ldWJlcnQiLCJhIjoiY2p0OHZ3MTc0MGM0czRhbzc4eGUwc3RmciJ9.g8WKRZc7pgEQN0JocAeFqg'
+
+
+def get_sales_data():
+    today = str(date.today()).replace('-', '')
+    URL = 'http://www.snittpris.se/backend/?id=MTQz&minSoldDate=20170310&maxSoldDate='+today+'&minFloor=&maxFloor=%27&minLivingArea=&maxLivingArea=&minRooms=&maxRooms=&objectType=VmlsbGEsTMOkZ2VuaGV0LEfDpXJkLFRvbXQtbWFyayxGcml0aWRzaHVzLFBhcmh1cyxLZWRqZWh1cw==&offset=0'
 
     session = requests.session()
 
@@ -30,12 +39,62 @@ def get_booli_data():
         print('fail')
 
     booli_data = req.json()
+    sales_data = json_normalize(booli_data['sold'])
 
-    print(booli_data)
+    return sales_data
 
-    return booli_data
+def create_scattermap(df):
 
-def create_charts():
     return
 
-booli_data = get_booli_data()
+
+def create_charts(df):
+
+    df['rooms'].fillna(0, inplace=True)
+    df['livingArea'].dropna(inplace=True)
+    df['soldPrice'].dropna(inplace=True)
+    df['text'] = df['location.address.streetAddress'] + ', rum:' + df['rooms'].round(0).astype(str) + ', boarea: ' + df['livingArea'].round(0).astype(str) + ', slutpris: ' + df['soldPrice'].round(0).astype(str)
+
+    site_lat = df['location.position.latitude']
+    site_lon = df['location.position.longitude']
+    locations_name = df['text']
+
+    data = [
+        go.Scattermapbox(
+            lat=site_lat,
+            lon=site_lon,
+            mode='markers',
+            marker=go.scattermapbox.Marker(
+                size=7,
+                color='rgb(255, 0, 255)',
+                opacity=0.7
+            ),
+            text=locations_name,
+            hoverinfo='text'
+        )]
+
+    layout = go.Layout(
+        title='Sålda objekt i Stockholm',
+        autosize=True,
+        hovermode='closest',
+        showlegend=False,
+        mapbox=go.layout.Mapbox(
+            accesstoken=mapbox_access_token,
+            bearing=0,
+            center=go.layout.mapbox.Center(
+                lat=58,
+                lon=18
+            ),
+            pitch=0,
+            zoom=3,
+            style='light'
+        ),
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+    plot(fig, filename='snittpriser-stockholm.html')
+    return
+
+sales_data = get_sales_data()
+create_charts(sales_data)
+
