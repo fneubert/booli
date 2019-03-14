@@ -95,6 +95,9 @@ def create_charts(df):
     plot(fig, filename='snittpriser-stockholm.html')
     return
 
+def create_sales_chart():
+    return
+
 sales_data = get_sales_data()
 create_charts(sales_data)
 
