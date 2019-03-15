@@ -91,8 +91,6 @@ def create_charts(df):
     data, layout = create_scattermap(df)
 
     fig = go.Figure(data=[data], layout=layout)
-
-
     plot(fig, filename='snittpriser-stockholm.html')
 
     return
