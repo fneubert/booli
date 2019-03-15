@@ -101,6 +101,5 @@ def create_sales_chart():
     return
 
 sales_data = get_sales_data()
-
 create_charts(sales_data)
 
