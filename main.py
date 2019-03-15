@@ -6,10 +6,8 @@ from datetime import date
 import plotly.graph_objs as go
 import plotly
 from plotly.offline import plot
+from plotly import tools
 plotly.tools.set_credentials_file(username='fneubert', api_key='mHBK7EcgD17bpZfWyvbt')
-
-
-
 mapbox_access_token = 'pk.eyJ1IjoiZm5ldWJlcnQiLCJhIjoiY2p0OHZ3MTc0MGM0czRhbzc4eGUwc3RmciJ9.g8WKRZc7pgEQN0JocAeFqg'
 
 
@@ -44,23 +42,11 @@ def get_sales_data():
     return sales_data
 
 def create_scattermap(df):
-
-    return
-
-
-def create_charts(df):
-
-    df['rooms'].fillna(0, inplace=True)
-    df['livingArea'].dropna(inplace=True)
-    df['soldPrice'].dropna(inplace=True)
-    df['text'] = df['location.address.streetAddress'] + ', rum:' + df['rooms'].round(0).astype(str) + ', boarea: ' + df['livingArea'].round(0).astype(str) + ', slutpris: ' + df['soldPrice'].round(0).astype(str)
-
     site_lat = df['location.position.latitude']
     site_lon = df['location.position.longitude']
     locations_name = df['text']
 
-    data = [
-        go.Scattermapbox(
+    data = go.Scattermapbox(
             lat=site_lat,
             lon=site_lon,
             mode='markers',
@@ -71,7 +57,7 @@ def create_charts(df):
             ),
             text=locations_name,
             hoverinfo='text'
-        )]
+        )
 
     layout = go.Layout(
         title='Sålda objekt i Stockholm',
@@ -82,17 +68,33 @@ def create_charts(df):
             accesstoken=mapbox_access_token,
             bearing=0,
             center=go.layout.mapbox.Center(
-                lat=58,
-                lon=18
+                lat=59.329444,
+                lon=18.068611
             ),
             pitch=0,
-            zoom=3,
+            zoom=7,
             style='light'
         ),
     )
 
-    fig = go.Figure(data=data, layout=layout)
+    return data, layout
+
+
+def create_charts(df):
+
+    df['rooms'].fillna(0, inplace=True)
+    df['livingArea'].dropna(inplace=True)
+    df['soldPrice'].dropna(inplace=True)
+    df['text'] = df['location.address.streetAddress'] + ', rum:' + df['rooms'].round(0).astype(str) + ', boarea: ' + \
+                 df['livingArea'].round(0).astype(str) + ', slutpris: ' + df['soldPrice'].round(0).astype(str)
+
+    data, layout = create_scattermap(df)
+
+    fig = go.Figure(data=[data], layout=layout)
+
+
     plot(fig, filename='snittpriser-stockholm.html')
+
     return
 
 def create_sales_chart():
