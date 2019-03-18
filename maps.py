@@ -1,23 +1,61 @@
 import plotly.graph_objs as go
 import plotly
-from plotly import tools
 from plotly.offline import plot
+from plotly import tools
 plotly.tools.set_credentials_file(username='fneubert', api_key='mHBK7EcgD17bpZfWyvbt')
 
-trace1 = go.Scatter(x=[1, 2, 3], y=[4, 5, 6])
-trace2 = go.Scatter(x=[20, 30, 40], y=[50, 60, 70])
-trace3 = go.Scatter(x=[300, 400, 500], y=[600, 700, 800])
-trace4 = go.Scatter(x=[4000, 5000, 6000], y=[7000, 8000, 9000])
-
-fig = tools.make_subplots(rows=2, cols=2, subplot_titles=('Plot 1', 'Plot 2',
-                                                          'Plot 3', 'Plot 4'))
-
-fig.append_trace(trace1, 1, 1)
-fig.append_trace(trace2, 1, 2)
-fig.append_trace(trace3, 2, 1)
-fig.append_trace(trace4, 2, 2)
-
-fig['layout'].update(height=600, width=600, title='Multiple Subplots' +
-                                                  ' with Titles')
-
-plot(fig, filename='make-subplots-multiple-with-titles')
+trace1 = go.Scatter(
+    x=[1, 2, 3],
+    y=[4, 5, 6]
+)
+trace2 = go.Scatter(
+    x=[20, 30, 40],
+    y=[50, 60, 70],
+    xaxis='x2',
+    yaxis='y2'
+)
+trace3 = go.Scatter(
+    x=[300, 400, 500],
+    y=[600, 700, 800],
+    xaxis='x3',
+    yaxis='y3'
+)
+trace4 = go.Scatter(
+    x=[4000, 5000, 6000],
+    y=[7000, 8000, 9000],
+    xaxis='x4',
+    yaxis='y4'
+)
+data = [trace1, trace2, trace3, trace4]
+layout = go.Layout(
+    xaxis=dict(
+        domain=[0, 0.45]
+    ),
+    yaxis=dict(
+        domain=[0, 0.45]
+    ),
+    xaxis2=dict(
+        domain=[0.55, 1]
+    ),
+    xaxis3=dict(
+        domain=[0, 0.45],
+        anchor='y3'
+    ),
+    xaxis4=dict(
+        domain=[0.55, 1],
+        anchor='y4'
+    ),
+    yaxis2=dict(
+        domain=[0, 0.45],
+        anchor='x2'
+    ),
+    yaxis3=dict(
+        domain=[0.55, 1]
+    ),
+    yaxis4=dict(
+        domain=[0.55, 1],
+        anchor='x4'
+    )
+)
+fig = go.Figure(data=data, layout=layout)
+plot(fig, filename='multiple-subplots', auto_open=True)
