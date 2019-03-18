@@ -87,7 +87,7 @@ def create_charts(df):
             r=80,
             pad=2,
         ),
-        autosize=True,
+        #autosize=True,
         hovermode='closest',
         showlegend=False,
         mapbox=go.layout.Mapbox(
@@ -112,7 +112,8 @@ def create_charts(df):
             title = 'Antal avslut',
         ),
         yaxis2 = dict(
-            range = [0, 6],
+            range = [0, 10],
+            domain = [0, 0.2],
             anchor = 'x',
         ),
         xaxis2 = dict(
