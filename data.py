@@ -28,7 +28,7 @@ def get_sales_data():
     BASE_URL = 'https://api.booli.se/'
     limit = 500
     offset = 0
-    url = BASE_URL + 'sold?areaId=1&limit=' + str(limit) + '&offset=' + str(offset) + '&minPublished=20150301&callerId='\
+    url = BASE_URL + 'sold?areaId=1&limit=' + str(limit) + '&offset=' + str(offset) + '&minPublished=20150101&callerId='\
           + callerId + '&time=' + timestamp + "&unique=" + unique + '&hash=' + hashstr
 
     response = requests.get(url, headers=headers)
@@ -40,6 +40,20 @@ def get_sales_data():
 
     result = response.json()
     sales_data = json_normalize(result['sold'])
+    total_count = result['totalCount']
+    loops = total_count // limit + 1
+
+    for i in range(0, loops):
+        url = BASE_URL + 'sold?areaId=1&limit=' + str(limit) + '&offset=' + str(
+            offset + limit*i) + '&minPublished=20150101&callerId=' \
+              + callerId + '&time=' + timestamp + "&unique=" + unique + '&hash=' + hashstr
+        response = requests.get(url, headers=headers)
+        try:
+            result = response.json()
+        except: pass
+        sales_data = sales_data.append(json_normalize(result['sold']), ignore_index = True, sort=False)
+
+
 
     return sales_data, result
 
