@@ -6,37 +6,18 @@ from datetime import date
 import plotly.graph_objs as go
 import plotly
 from plotly.offline import plot
+from data import get_booli_data
+
 plotly.tools.set_credentials_file(username='fneubert', api_key='mHBK7EcgD17bpZfWyvbt')
 mapbox_access_token = 'pk.eyJ1IjoiZm5ldWJlcnQiLCJhIjoiY2p0OHZ3MTc0MGM0czRhbzc4eGUwc3RmciJ9.g8WKRZc7pgEQN0JocAeFqg'
 
 
 def get_sales_data():
-    today = str(date.today()).replace('-', '')
-    URL = 'http://www.snittpris.se/backend/?id=MTQz&minSoldDate=20170310&maxSoldDate='+today+'&minFloor=&maxFloor=%27&minLivingArea=&maxLivingArea=&minRooms=&maxRooms=&objectType=VmlsbGEsTMOkZ2VuaGV0LEfDpXJkLFRvbXQtbWFyayxGcml0aWRzaHVzLFBhcmh1cyxLZWRqZWh1cw==&offset=0'
 
-    session = requests.session()
-
-
-    authentication_data = {
-    'Accept': 'application / json, text / plain, * / *',
-    'Accept - Encoding': 'gzip, deflate',
-    'Accept - Language': 'sv - SE, sv; q = 0.9, en - US; q = 0.8, en; q = 0.7, de; q = 0.6',
-    'Connection': 'keep - alive',
-    'Cookie': '_ga = GA1.2.1935937918.1552236605;'
-            'gid = GA1.2.1231589156.1552236605;_gat=1',
-    'Host': 'www.snittpris.se',
-    'Referer': 'http: // www.snittpris.se /',
-    'User - Agent': 'Mozilla / 5.0(Macintosh;'
-    'Intel Mac OS X 10_14_3) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 72.0.3626.96 Safari / 537.36'
-        }
-
-    req = session.get(URL, headers=authentication_data)
-
-    if req.status_code != requests.codes.ok:
-        print('fail')
-
-    booli_data = req.json()
-    sales_data = json_normalize(booli_data['sold'])
+    try:
+        sales_data = pd.read_csv('booli_data ' + str(date.today()), low_memory=False)
+    except:
+        sales_data = get_booli_data()
 
     return sales_data
 
@@ -52,6 +33,10 @@ def create_charts(df):
     site_lon = df['location.position.longitude']
     locations_name = df['text']
 
+    df_averages = pd.DataFrame()
+
+
+
     data = go.Scattermapbox(
         lat=site_lat,
         lon=site_lon,
@@ -64,6 +49,8 @@ def create_charts(df):
         text=locations_name,
         hoverinfo='text'
     )
+
+
 
     trace1 = go.Scatter(
         x=[1, 2, 3],
@@ -118,7 +105,7 @@ def create_charts(df):
         ),
         xaxis2 = dict(
             range= ['2017', '2019'],
-            domain = [0.53,1],
+            domain = [0.53, 1],
             anchor = 'y',
             title = 'Snittpriser'
         ),
@@ -134,8 +121,6 @@ def create_charts(df):
 
     return
 
-def create_sales_chart():
-    return
-
 sales_data = get_sales_data()
 create_charts(sales_data)
+

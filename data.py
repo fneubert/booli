@@ -1,4 +1,5 @@
 import time
+from datetime import date
 import requests
 from hashlib import sha1
 import random
@@ -7,7 +8,7 @@ import numpy as np
 import pandas as pd
 from pandas.io.json import json_normalize
 
-def get_sales_data():
+def get_booli_data():
     private_key = "AhNpKGH4ToJBtmiAdjiSW3SFG1lej3x6UeNQRJn5"
     callerId = 'fariz.neubert'
 
@@ -28,7 +29,7 @@ def get_sales_data():
     BASE_URL = 'https://api.booli.se/'
     limit = 500
     offset = 0
-    url = BASE_URL + 'sold?areaId=1&limit=' + str(limit) + '&offset=' + str(offset) + '&minPublished=20150101&callerId='\
+    url = BASE_URL + 'sold?q=innanf%C3%B6r%20tullarna&limit=' + str(limit) + '&offset=' + str(offset) + '&minPublished=20150101&callerId='\
           + callerId + '&time=' + timestamp + "&unique=" + unique + '&hash=' + hashstr
 
     response = requests.get(url, headers=headers)
@@ -43,18 +44,23 @@ def get_sales_data():
     total_count = result['totalCount']
     loops = total_count // limit + 1
 
-    for i in range(0, loops):
-        url = BASE_URL + 'sold?areaId=1&limit=' + str(limit) + '&offset=' + str(
+    for i in range(1, loops):
+        timestamp = str(int(time.time()))
+        unique = ''.join(random.choice(string.ascii_uppercase + string.digits) for x in range(16))
+        hashstr = sha1((callerId + timestamp + private_key + unique).encode('utf-8')).hexdigest()
+        if i == loops: i = ((loops * limit - total_count) + limit*(i - 1))/ limit
+        url = BASE_URL + 'sold?q=innanf%C3%B6r%20tullarna&limit=' + str(limit) + '&offset=' + str(
             offset + limit*i) + '&minPublished=20150101&callerId=' \
               + callerId + '&time=' + timestamp + "&unique=" + unique + '&hash=' + hashstr
         response = requests.get(url, headers=headers)
         try:
             result = response.json()
-        except: pass
+        except:
+            print(response.text)
+            pass
         sales_data = sales_data.append(json_normalize(result['sold']), ignore_index = True, sort=False)
 
+    return sales_data
 
-
-    return sales_data, result
-
-sales, result = get_sales_data()
+sales = get_booli_data()
+sales.to_csv('booli_data ' + str(date.today()))
