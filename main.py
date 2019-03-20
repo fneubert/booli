@@ -15,7 +15,7 @@ mapbox_access_token = 'pk.eyJ1IjoiZm5ldWJlcnQiLCJhIjoiY2p0OHZ3MTc0MGM0czRhbzc4eG
 def get_sales_data():
 
     try:
-        sales_data = pd.read_csv('booli_data ' + str(date.today()), low_memory=False)
+        sales_data = pd.read_csv('booli_data ' + str(date.today())+'.csv', low_memory=False)
     except:
         sales_data = get_booli_data()
 
@@ -33,9 +33,30 @@ def create_charts(df):
     site_lon = df['location.position.longitude']
     locations_name = df['text']
 
-    df_averages = pd.DataFrame()
+    df_averages = pd.DataFrame(columns = ['months', 'averagePrices', 'deals'])
+    df['soldDate'] = pd.to_datetime(df['soldDate'])
+    df_averages['months'] = pd.date_range(start = df['soldDate'].min(), end=df['soldDate'].max(), freq='M')
+    df['squareMeterPrice'] = df['soldPrice'].divide(df['livingArea'])
 
+    i=0
+    for month in df_averages['months']:
+        print(i)
+        if i == 0:
+            filtered_df = df[df['soldDate'] < month]
+            filtered_df['squareMeterPrice'].dropna(inplace=True)
+            df_averages.at[i,'averagePrices'] = filtered_df['squareMeterPrice'].mean()
+            df_averages.at[i,'deals'] = len(filtered_df)
+            last_month = month
+            i = i + 1
+            continue
+        filtered_df = df[(df['soldDate'] >= last_month) & (df['soldDate'] < month)]
+        filtered_df['squareMeterPrice'].dropna(inplace=True)
+        df_averages.at[i,'averagePrices'] = filtered_df['squareMeterPrice'].mean()
+        df_averages.at[i,'deals'] = len(filtered_df)
+        last_month = month
+        i = i + 1
 
+    #print(df_averages)
 
     data = go.Scattermapbox(
         lat=site_lat,
@@ -50,17 +71,22 @@ def create_charts(df):
         hoverinfo='text'
     )
 
-
-
-    trace1 = go.Scatter(
-        x=[1, 2, 3],
-        y=[4, 5, 6]
-    )
-    trace2 = go.Scatter(
-        x=[20, 30, 40],
-        y=[50, 60, 70],
-        xaxis='x2',
+    trace3 = go.Scatter(
+        x = df_averages['months'],
+        y = df_averages['averagePrices'],
+        hoverinfo='x+y',
+        xaxis='x',
         yaxis='y2'
+    )
+    trace4 = go.Scatter(
+        x = df_averages['months'],
+        y=df_averages['deals'],
+        mode='lines',
+        fill='tozeroy',
+        hoverinfo='x+y',
+        xaxis='x2',
+        yaxis='y'
+
     )
 
     layout = go.Layout(
@@ -93,30 +119,32 @@ def create_charts(df):
             style='light'
         ),
         xaxis = dict(
-            range = ['2017', '2019'],
+            #range = df_averages['months'].astype(str).tolist(),
+            range=['2015', '2019'],
             domain = [0, 0.48],
             anchor = 'y2',
-            title = 'Antal avslut',
+            title = 'Snittpriser',
         ),
         yaxis2 = dict(
-            range = [0, 10],
+            range = [0,df_averages['averagePrices'].max()],
             domain = [0, 0.2],
             anchor = 'x',
         ),
         xaxis2 = dict(
-            range= ['2017', '2019'],
+            #range= df_averages['months'].astype(str).tolist(),
+            range=['2015', '2019'],
             domain = [0.53, 1],
             anchor = 'y',
-            title = 'Snittpriser'
+            title = 'Antal avslut'
         ),
         yaxis = dict(
-            range = [0, 70],
+            range = [0,df_averages['deals'].max()],
             domain = [0, 0.2],
             anchor = 'x2'
         )
     )
 
-    fig = go.Figure(data=[data,trace1,trace2], layout=layout)
+    fig = go.Figure(data=[data,trace3,trace4], layout=layout)
     plot(fig, filename='snittpriser-stockholm.html', auto_open=True)
 
     return

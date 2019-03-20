@@ -63,4 +63,4 @@ def get_booli_data():
     return sales_data
 
 sales = get_booli_data()
-sales.to_csv('booli_data ' + str(date.today()))
+sales.to_csv('booli_data ' + str(date.today())+'.csv')
