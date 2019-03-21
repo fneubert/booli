@@ -27,7 +27,7 @@ def get_averages(df):
     df_averages['months'] = pd.date_range(start = df['soldDate'].min(), end=df['soldDate'].max(), freq='M')
     i = 0
     for month in df_averages['months']:
-        print(i)
+        #print(i)
         if i == 0:
             filtered_df = df[df['soldDate'] < month]
             filtered_df['squareMeterPrice'].dropna(inplace=True)
@@ -62,13 +62,19 @@ def create_charts(df):
 
     # Create averages DFs
 
-    df_averages = get_averages(df)
-    #print(df_averages)
+    df_2 = df[df['rooms'] == 2]
+    df_3 = df[df['rooms'] == 2]
+    df_averages_2 = get_averages(df_2)
+    df_averages_3 = get_averages(df_3)
 
+    df_averages_total = get_averages(df)
+
+    # Create traces
     data = go.Scattermapbox(
         lat=site_lat,
         lon=site_lon,
         mode='markers',
+        name='Position för alla sålda bostadsrätter',
         marker=go.scattermapbox.Marker(
             size=7,
             color='rgb(255, 0, 255)',
@@ -78,19 +84,41 @@ def create_charts(df):
         hoverinfo='text'
     )
 
-    trace3 = go.Scatter(
-        x = df_averages['months'],
-        y = df_averages['averagePrices'],
+    trace_prices_total = go.Scatter(
+        x = df_averages_total['months'],
+        y = df_averages_total['averagePrices'],
         mode='lines+markers',
-        name='Alla',
+        name='Snittpriser för alla bostadsrätter',
         hoverinfo='x+y',
         xaxis='x',
         yaxis='y2'
     )
-    trace4 = go.Scatter(
-        x = df_averages['months'],
-        y=df_averages['deals'],
+
+    trace_prices_2 = go.Scatter(
+        x=df_averages_2['months'],
+        y=df_averages_2['averagePrices'],
+        mode='lines+markers',
+        name='Snittpriser för tvåor',
+        hoverinfo='x+y',
+        xaxis='x',
+        yaxis='y2'
+    )
+
+    trace_prices_3= go.Scatter(
+        x=df_averages_3['months'],
+        y=df_averages_3['averagePrices'],
+        mode='lines+markers',
+        name='Snittpriser för treor',
+        hoverinfo='x+y',
+        xaxis='x',
+        yaxis='y2'
+    )
+
+    trace_deals_total = go.Scatter(
+        x = df_averages_total['months'],
+        y=df_averages_total['deals'],
         mode='lines',
+        name='ntal avslut för alla bostadsrätter',
         fill='tozeroy',
         hoverinfo='x+y',
         xaxis='x2',
@@ -98,10 +126,11 @@ def create_charts(df):
 
     )
 
+    # Create layout
     layout = go.Layout(
         title='Sålda objekt i Stockholm',
-        width=960,
-        height=720,
+        width=1680,
+        height=768,
         margin=dict(
             t=80,
             l=80,
@@ -111,7 +140,7 @@ def create_charts(df):
         ),
         #autosize=True,
         hovermode='closest',
-        showlegend=False,
+        showlegend=True,
         mapbox=go.layout.Mapbox(
             accesstoken=mapbox_access_token,
             bearing=0,
@@ -128,32 +157,32 @@ def create_charts(df):
             style='light'
         ),
         xaxis = dict(
-            #range = df_averages['months'].astype(str).tolist(),
+            #df_averages_total = df_averages['months'].astype(str).tolist(),
             range=['2015', '2020'],
             domain = [0, 0.48],
             anchor = 'y2',
             title = 'Snittpriser',
         ),
         yaxis2 = dict(
-            range = [0,df_averages['averagePrices'].max()],
+            range = [70000,df_averages_total['averagePrices'].max()],
             domain = [0, 0.2],
             anchor = 'x',
         ),
         xaxis2 = dict(
-            #range= df_averages['months'].astype(str).tolist(),
+            #range= df_averages_total['months'].astype(str).tolist(),
             range=['2015', '2020'],
             domain = [0.53, 1],
             anchor = 'y',
             title = 'Antal avslut'
         ),
         yaxis = dict(
-            range = [0,df_averages['deals'].max()],
+            range = [0,df_averages_total['deals'].max()],
             domain = [0, 0.2],
             anchor = 'x2'
         )
     )
 
-    fig = go.Figure(data=[data,trace3,trace4], layout=layout)
+    fig = go.Figure(data=[data,trace_prices_total,trace_prices_2, trace_prices_3, trace_deals_total], layout=layout)
     plot(fig, filename='snittpriser-stockholm.html', auto_open=True)
 
     return
