@@ -11,34 +11,21 @@ from data import get_booli_data
 plotly.tools.set_credentials_file(username='fneubert', api_key='mHBK7EcgD17bpZfWyvbt')
 mapbox_access_token = 'pk.eyJ1IjoiZm5ldWJlcnQiLCJhIjoiY2p0OHZ3MTc0MGM0czRhbzc4eGUwc3RmciJ9.g8WKRZc7pgEQN0JocAeFqg'
 
-
 def get_sales_data():
 
     try:
-        sales_data = pd.read_csv('booli_data ' + str(date.today())+'.csv', low_memory=False)
+        sales_data = pd.read_csv('booli_data ' + str(date.today())+'.csv', low_memory=True)
     except:
         sales_data = get_booli_data()
 
     return sales_data
 
-def create_charts(df):
 
-    df['rooms'].fillna(0, inplace=True)
-    df['livingArea'].dropna(inplace=True)
-    df['soldPrice'].dropna(inplace=True)
-    df['text'] = df['location.address.streetAddress'] + ', rum:' + df['rooms'].round(0).astype(str) + ', boarea: ' + \
-                 df['livingArea'].round(0).astype(str) + ', slutpris: ' + df['soldPrice'].round(0).astype(str)
+def get_averages(df):
 
-    site_lat = df['location.position.latitude']
-    site_lon = df['location.position.longitude']
-    locations_name = df['text']
-
-    df_averages = pd.DataFrame(columns = ['months', 'averagePrices', 'deals'])
-    df['soldDate'] = pd.to_datetime(df['soldDate'])
+    df_averages = pd.DataFrame(columns=['months', 'averagePrices', 'deals'])
     df_averages['months'] = pd.date_range(start = df['soldDate'].min(), end=df['soldDate'].max(), freq='M')
-    df['squareMeterPrice'] = df['soldPrice'].divide(df['livingArea'])
-
-    i=0
+    i = 0
     for month in df_averages['months']:
         print(i)
         if i == 0:
@@ -56,6 +43,26 @@ def create_charts(df):
         last_month = month
         i = i + 1
 
+    return df_averages
+
+def create_charts(df):
+
+    # pre-processing
+    df['rooms'].fillna(0, inplace=True)
+    df['livingArea'].dropna(inplace=True)
+    df['soldPrice'].dropna(inplace=True)
+    df['text'] = df['location.address.streetAddress'] + ', rum:' + df['rooms'].round(0).astype(str) + ', boarea: ' + \
+                 df['livingArea'].round(0).astype(str) + ', slutpris: ' + df['soldPrice'].round(0).astype(str)
+
+    site_lat = df['location.position.latitude']
+    site_lon = df['location.position.longitude']
+    locations_name = df['text']
+    df['soldDate'] = pd.to_datetime(df['soldDate'])
+    df['squareMeterPrice'] = df['soldPrice'].divide(df['livingArea'])
+
+    # Create averages DFs
+
+    df_averages = get_averages(df)
     #print(df_averages)
 
     data = go.Scattermapbox(
@@ -74,6 +81,8 @@ def create_charts(df):
     trace3 = go.Scatter(
         x = df_averages['months'],
         y = df_averages['averagePrices'],
+        mode='lines+markers',
+        name='Alla',
         hoverinfo='x+y',
         xaxis='x',
         yaxis='y2'
@@ -120,7 +129,7 @@ def create_charts(df):
         ),
         xaxis = dict(
             #range = df_averages['months'].astype(str).tolist(),
-            range=['2015', '2019'],
+            range=['2015', '2020'],
             domain = [0, 0.48],
             anchor = 'y2',
             title = 'Snittpriser',
@@ -132,7 +141,7 @@ def create_charts(df):
         ),
         xaxis2 = dict(
             #range= df_averages['months'].astype(str).tolist(),
-            range=['2015', '2019'],
+            range=['2015', '2020'],
             domain = [0.53, 1],
             anchor = 'y',
             title = 'Antal avslut'
