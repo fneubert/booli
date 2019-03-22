@@ -45,6 +45,15 @@ def get_averages(df):
 
     return df_averages
 
+def create_statistics_table(df):
+
+    statistics_table = go.Table(
+        domain=dict(x=[0.65, 1],
+                    y=[0.35, 1.0]),
+    )
+
+    return statistics_table
+
 def create_charts(df):
 
     # pre-processing
@@ -186,13 +195,6 @@ def create_charts(df):
         hoverinfo='x+y',
         xaxis='x2',
         yaxis='y'
-    )
-
-    trace1 = go.Scatter(
-        x=[1, 2, 3],
-        y=[4, 5, 6],
-        xaxis='x3',
-        yaxis='y3'
     )
 
     # Create layout
