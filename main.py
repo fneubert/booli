@@ -63,11 +63,24 @@ def create_charts(df):
     # Create averages DFs
 
     df_2 = df[df['rooms'] == 2]
-    df_3 = df[df['rooms'] == 2]
+    df_3 = df[df['rooms'] == 3]
     df_averages_2 = get_averages(df_2)
     df_averages_3 = get_averages(df_3)
-
     df_averages_total = get_averages(df)
+
+    # Create location-based averages DFs
+    df_vasastan = df[df['location.namedAreas'].str.contains('Vasastan', na=False)]
+    df_kungsholmen = df[df['location.namedAreas'].str.contains('Kungsholmen', na=False)]
+    df_ostermalm = df[df['location.namedAreas'].str.contains('Östermalm', na=False)]
+    df_sodermalm = df[df['location.namedAreas'].str.contains('Södermalm', na=False)]
+    df_gardet = df[df['location.namedAreas'].str.contains('Gärdet', na=False)]
+
+    df_averages_vasastan = get_averages(df_vasastan)
+    df_averages_kungsholmen = get_averages(df_kungsholmen)
+    df_averages_ostermalm = get_averages(df_ostermalm)
+    df_averages_sodermalm = get_averages(df_sodermalm)
+    df_averages_gardet = get_averages(df_gardet)
+
 
     # Create traces
     data = go.Scattermapbox(
@@ -118,7 +131,7 @@ def create_charts(df):
         x = df_averages_total['months'],
         y=df_averages_total['deals'],
         mode='lines',
-        name='ntal avslut för alla bostadsrätter',
+        name='Antal avslut för alla bostadsrätter',
         fill='tozeroy',
         hoverinfo='x+y',
         xaxis='x2',
@@ -129,8 +142,8 @@ def create_charts(df):
     # Create layout
     layout = go.Layout(
         title='Sålda objekt i Stockholm',
-        width=1680,
-        height=768,
+        #width=1200,
+        #height=720,
         margin=dict(
             t=80,
             l=80,
@@ -138,7 +151,7 @@ def create_charts(df):
             r=80,
             pad=2,
         ),
-        #autosize=True,
+        autosize=True,
         hovermode='closest',
         showlegend=True,
         mapbox=go.layout.Mapbox(
@@ -150,7 +163,7 @@ def create_charts(df):
             ),
             domain=dict(
                 x=[0,1],
-                y=[0.24,1]
+                y=[0.35,1]
             ),
             pitch=0,
             zoom=10,
@@ -161,11 +174,11 @@ def create_charts(df):
             range=['2015', '2020'],
             domain = [0, 0.48],
             anchor = 'y2',
-            title = 'Snittpriser',
+            title = 'Snittpriser per rum',
         ),
         yaxis2 = dict(
-            range = [70000,df_averages_total['averagePrices'].max()],
-            domain = [0, 0.2],
+            range = [70000,105000],
+            domain = [0, 0.3],
             anchor = 'x',
         ),
         xaxis2 = dict(
@@ -177,7 +190,7 @@ def create_charts(df):
         ),
         yaxis = dict(
             range = [0,df_averages_total['deals'].max()],
-            domain = [0, 0.2],
+            domain = [0, 0.3],
             anchor = 'x2'
         )
     )
