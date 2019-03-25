@@ -1,61 +1,55 @@
 import plotly.graph_objs as go
 import plotly
+import plotly.plotly as py
 from plotly.offline import plot
-from plotly import tools
 plotly.tools.set_credentials_file(username='fneubert', api_key='mHBK7EcgD17bpZfWyvbt')
 
-trace1 = go.Scatter(
-    x=[1, 2, 3],
-    y=[4, 5, 6]
+header_table = go.Table(
+    columnwidth=[1.55, 3, 3, 3, 3],
+    header=dict(height=50,
+                values=[' ', '<b>Prisutveckling, 6 mån</b>', '<b>Prisutveckling, 12 mån</b>',
+                        '<b>Volatilitet, 6 mån</b>', '<b>Volatilitet, 12 mån</b>'],
+                font=dict(size=12),
+                # line = dict(color = '#000000'),
+                fill=dict(color='rgb(255, 255, 2)'),
+                align='center',
+                ),
+    domain=dict(x=[0.35, 1],
+                y=[0.92, 1])
 )
-trace2 = go.Scatter(
-    x=[20, 30, 40],
-    y=[50, 60, 70],
-    xaxis='x2',
-    yaxis='y2'
+
+statistics_table = go.Table(
+    columnwidth=[1.55,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    header=dict(height=45,
+                values=['<b>Område</b>', '<b>Alla</b>', '<b>Två:or</b>', '<b>Tre:or</b>',
+                        '<b>Alla</b>', '<b>Två:or</b>', '<b>Tre:or</b>', '<b>Alla</b>', '<b>Två:or</b>', '<b>Tre:or</b>',
+                        '<b>Alla</b>', '<b>Två:or</b>', '<b>Tre:or</b>'],
+                font=dict(size=11),
+                # line=dict(color='#000000'),
+                fill=dict(color='rgb(240, 240, 240)')
+                ),
+    cells=dict(height=40,
+               values=[['Vasastan', 'Östermalm', 'Gärdet', 'Södermalm', 'Kungsholmen'],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5],
+                       [1, 2, 3, 4, 5]
+                       ],
+               font=dict(size=11),
+               align=['left'] + ['right'] * 12,
+               ),
+    domain=dict(x=[0.35, 1],
+                y=[0.3, 0.92])
 )
-trace3 = go.Scatter(
-    x=[300, 400, 500],
-    y=[600, 700, 800],
-    xaxis='x3',
-    yaxis='y3'
-)
-trace4 = go.Scatter(
-    x=[4000, 5000, 6000],
-    y=[7000, 8000, 9000],
-    xaxis='x4',
-    yaxis='y4'
-)
-data = [trace1, trace2, trace3, trace4]
-layout = go.Layout(
-    xaxis=dict(
-        domain=[0, 0.45]
-    ),
-    yaxis=dict(
-        domain=[0, 0.45]
-    ),
-    xaxis2=dict(
-        domain=[0.55, 1]
-    ),
-    xaxis3=dict(
-        domain=[0, 0.45],
-        anchor='y3'
-    ),
-    xaxis4=dict(
-        domain=[0.55, 1],
-        anchor='y4'
-    ),
-    yaxis2=dict(
-        domain=[0, 0.45],
-        anchor='x2'
-    ),
-    yaxis3=dict(
-        domain=[0.55, 1]
-    ),
-    yaxis4=dict(
-        domain=[0.55, 1],
-        anchor='x4'
-    )
-)
-fig = go.Figure(data=data, layout=layout)
-plot(fig, filename='multiple-subplots', auto_open=True)
+
+data = [header_table, statistics_table]
+plot(data, filename = 'basic_table',auto_open=True)
+
