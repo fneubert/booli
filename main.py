@@ -52,9 +52,9 @@ def get_averages(df):
 def create_statistics_table(df):
 
 
-    statistics_list = ['price_six_months', 'price_twelve_months','volatility_six_months', 'volatility_twelve_months']
+    statistics_list = ['price_six_months', 'price_twelve_months','price_twntyfour']
     room_type = ['all', 2, 3]
-    areas = ['Vasastan', 'Östermalm', 'Gärdet', 'Södermalm', 'Kungsholmen']
+    areas = ['Vasastan', 'Östermalm', 'Gärdet', 'Södermalm', 'Kungsholmen', 'Stockholms innerstad']
 
     table = []
     for statistic_type in statistics_list:
@@ -65,35 +65,31 @@ def create_statistics_table(df):
                     df_statistics = df
                 else:
                     df_statistics = df[df['rooms'] == room]
-                df_statistics = df_statistics[df_statistics['location.namedAreas'].str.contains(area, na=False)]
+                    if not area == 'Stockholms innerstad':
+                        df_statistics = df_statistics[df_statistics['location.namedAreas'].str.contains(area, na=False)]
+                    else:
+                        df_statistics = df_statistics
                 df_averages = get_averages(df_statistics)
                 if statistic_type == 'price_six_months':
                     statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-7]-1)*100).round(2)) + '%'
                 elif statistic_type == 'price_twelve_months':
                     statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-13]-1)*100).round(2)) + '%'
-                elif statistic_type == 'volatility_six_months':
-                    month = date.today()+ datedelta.datedelta(months=-6)
-                    filtered_df = df_statistics[df_statistics['soldDate'] >= month]
-                    statistic = "{:,}".format((filtered_df['soldPrice'].std()).round(0))
-                elif statistic_type == 'volatility_twelve_months':
-                    month = date.today() + datedelta.datedelta(months=-12)
-                    filtered_df = df_statistics[df_statistics['soldDate'] >= month]
-                    statistic = "{:,}".format((filtered_df['soldPrice'].std()).round(0))
+                elif statistic_type == 'price_twntyfour':
+                    statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-25]-1)*100).round(2)) + '%'
                 col.append(statistic)
             table.append(col)
                 #print(table)
 
     header_table = go.Table(
-        columnwidth=[1.55, 3, 3, 3, 3],
+        columnwidth=[1.55, 3, 3, 3],
         header=dict(height=50,
-                    values=[' ', '<b>Prisutveckling, 6 mån</b>', '<b>Prisutveckling, 12 mån</b>',
-                            '<b>Volatilitet, 6 mån</b>', '<b>Volatilitet, 12 mån</b>'],
-                    font=dict(size=11),
+                    values=[' ', '<b>Prisutveckling, 6 mån</b>', '<b>Prisutveckling, 12 mån</b>', '<b>Prisutveckling, 24mån</b>'],
+                    font=dict(size=12),
                     # line = dict(color = '#000000'),
                     fill=dict(color='rgb(255, 255, 2)'),
                     align='center',
                     ),
-        domain=dict(x=[0.33, 1],
+        domain=dict(x=[0.51, 1],
                     y=[0.94, 1])
     )
 
@@ -101,15 +97,13 @@ def create_statistics_table(df):
         columnwidth=[1.55, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         header=dict(height=45,
                     values=['<b>Område</b>', '<b>Alla</b>', '<b>Två:or</b>', '<b>Tre:or</b>',
-                            '<b>Alla</b>', '<b>Två:or</b>', '<b>Tre:or</b>', '<b>Alla</b>', '<b>Två:or</b>',
-                            '<b>Tre:or</b>',
-                            '<b>Alla</b>', '<b>Två:or</b>', '<b>Tre:or</b>'],
-                    font=dict(size=10),
+                            '<b>Alla</b>', '<b>Två:or</b>', '<b>Tre:or</b>', '<b>Alla</b>', '<b>Två:or</b>', '<b>Tre:or</b>'],
+                    font=dict(size=11),
                     # line=dict(color='#000000'),
                     fill=dict(color='rgb(240, 240, 240)')
                     ),
         cells=dict(height=45,
-                   values=[['Vasastan', 'Östermalm', 'Gärdet', 'Södermalm', 'Kungsholmen'],
+                   values=[['Vasastan', 'Östermalm', 'Gärdet', 'Södermalm', 'Kungsholmen', 'Stockholms innerstad'],
                            table[0],
                            table[1],
                            table[2],
@@ -119,15 +113,12 @@ def create_statistics_table(df):
                            table[6],
                            table[7],
                            table[8],
-                           table[9],
-                           table[10],
-                           table[11],
                            ],
-                   font=dict(size=10),
-                   align=['left'] + ['right'] * 12,
+                   font=dict(size=11),
+                   align=['left'] + ['right'] * 9,
                    ),
-        domain=dict(x=[0.33, 1],
-                    y=[0.35, 0.94])
+        domain=dict(x=[0.51, 1],
+                    y=[0.45, 0.94])
     )
 
     return header_table,statistics_table
@@ -138,14 +129,14 @@ def create_charts(df):
     df['rooms'].fillna(0, inplace=True)
     df['livingArea'].dropna(inplace=True)
     df['soldPrice'].dropna(inplace=True)
-    df['text'] = df['location.address.streetAddress'] + ', rum:' + df['rooms'].round(0).astype(str) + ', boarea: ' + \
-                 df['livingArea'].round(0).astype(str) + ', slutpris: ' + df['soldPrice'].round(0).astype(str)
 
     site_lat = df['location.position.latitude']
     site_lon = df['location.position.longitude']
-    locations_name = df['text']
     df['soldDate'] = pd.to_datetime(df['soldDate'])
     df['squareMeterPrice'] = df['soldPrice'].divide(df['livingArea'])
+    df['text'] = df['location.address.streetAddress'] + ', rum:' + df['rooms'].round(0).astype(str) + ', boarea: ' + \
+                 df['livingArea'].round(0).astype(str) + ', slutpris: ' + df['soldPrice'].round(0).astype(str) + ', kvadratmeterpris: ' + df['squareMeterPrice'].round(0).astype(str)
+    locations_name = df['text']
 
     # Create averages DFs
 
@@ -263,17 +254,80 @@ def create_charts(df):
         xaxis='x3',
         yaxis='y2'
     )
+    
+    df_averages_other  = pd.DataFrame(columns=['months', 'deals'])
+    df_averages_other['deals'] = df_averages_total['deals'] - df_averages_sodermalm['deals']- df_averages_kungsholmen['deals']\
+                        - df_averages_ostermalm['deals']-df_averages_vasastan['deals']
+
+    df_averages_other['months'] = df_averages_total['months']
 
     trace_deals_total = go.Scatter(
-        x = df_averages_total['months'],
-        y=df_averages_total['deals'],
+        x = df_averages_other['months'],
+        y=df_averages_other['deals'],
         mode='lines',
         name='Antal avslut',
-        fill='tozeroy',
+        stackgroup='one',
         hoverinfo='x+y',
         xaxis='x2',
         yaxis='y'
     )
+
+    trace_deals_vasastan= go.Scatter(
+        x = df_averages_vasastan['months'],
+        y=df_averages_vasastan['deals'],
+        mode='lines',
+        name='Antal avslut i <br />Vasastan',
+        stackgroup='one',
+        hoverinfo='x+y',
+        xaxis='x2',
+        yaxis='y'
+    )
+
+    trace_deals_ostermalm = go.Scatter(
+        x = df_averages_ostermalm['months'],
+        y=df_averages_ostermalm['deals'],
+        mode='lines',
+        name='Antal avslut i <br />Östermalm',
+        stackgroup='one',
+        hoverinfo='x+y',
+        xaxis='x2',
+        yaxis='y'
+    )
+
+    trace_deals_kungsholmen= go.Scatter(
+        x = df_averages_kungsholmen['months'],
+        y=df_averages_kungsholmen['deals'],
+        mode='lines',
+        name='Antal avslut i <br />Kungsholmen',
+        stackgroup='one',
+        hoverinfo='x+y',
+        xaxis='x2',
+        yaxis='y'
+    )
+
+
+    trace_deals_sodermalm= go.Scatter(
+        x = df_averages_sodermalm['months'],
+        y=df_averages_sodermalm['deals'],
+        mode='lines',
+        name='Antal avslut i <br />Södermalm',
+        stackgroup='one',
+        hoverinfo='x+y',
+        xaxis='x2',
+        yaxis='y'
+    )
+
+    trace_deals_gardet= go.Scatter(
+        x = df_averages_gardet['months'],
+        y=df_averages_gardet['deals'],
+        mode='lines',
+        name='Antal avslut i <br />Gärdet',
+        stackgroup='one',
+        hoverinfo='x+y',
+        xaxis='x2',
+        yaxis='y'
+    )
+
     header_table, statistics_table = create_statistics_table(df)
 
     # Create layout
@@ -299,8 +353,8 @@ def create_charts(df):
                 lon=18.068611
             ),
             domain=dict(
-                x=[0,0.32],
-                y=[0.35,1]
+                x=[0,0.49],
+                y=[0.5,1]
             ),
             pitch=0,
             zoom=10,
@@ -315,40 +369,40 @@ def create_charts(df):
         ),
         yaxis2 = dict(
             range = [70000,120000],
-            domain = [0, 0.3],
+            domain = [0, 0.45],
             anchor = 'x',
         ),
         xaxis2 = dict(
             #range= df_averages_total['months'].astype(str).tolist(),
             #range=['2015', '2020'],
-            domain = [0.65, 1],
+            domain = [0.67, 1],
             anchor = 'y',
             title = 'Antal avslut'
         ),
         yaxis = dict(
-            range = [0,df_averages_total['deals'].max()],
-            domain = [0, 0.3],
+            domain = [0, 0.45],
             anchor = 'x2',
         ),
         xaxis3=dict(
             # df_averages_total = df_averages['months'].astype(str).tolist(),
             #range=['2015', '2020'],
-            domain=[0.33, 0.6],
+            domain=[0.33, 0.66],
             anchor='y2',
             title='Snittpriser per stadsdel',
         ),
         yaxis3=dict(
             range=[70000, 120000],
-            domain=[0, 0.3],
+            domain=[0, 0.45],
             anchor='x',
         )
     )
 
     fig = go.Figure(data=[data,trace_prices_total,trace_prices_2, trace_prices_3, trace_deals_total,
                           trace_vasastan, trace_kungsholmen, trace_ostermalm, trace_gardet,trace_sodermalm,
+                          trace_deals_vasastan, trace_deals_sodermalm, trace_deals_ostermalm, trace_deals_gardet, trace_deals_kungsholmen,
                           header_table, statistics_table], layout=layout)
-    plot(fig, filename='snittpriser-stockholm.html', auto_open=True)
-    #py.plot(fig, filename='snittpriser-stockholm.html', auto_open=True)
+    #plot(fig, filename='snittpriser-stockholm.html', auto_open=True)
+    py.plot(fig, filename='snittpriser-stockholm.html', auto_open=True)
 
     return
 
