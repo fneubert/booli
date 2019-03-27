@@ -135,7 +135,7 @@ def create_charts(df):
     df['soldDate'] = pd.to_datetime(df['soldDate'])
     df['squareMeterPrice'] = df['soldPrice'].divide(df['livingArea'])
     df['text'] = df['location.address.streetAddress'] + ', rum:' + df['rooms'].round(0).astype(str) + ', boarea: ' + \
-                 df['livingArea'].round(0).astype(str) + ', slutpris: ' + df['soldPrice'].round(0).astype(str) + ', kvadratmeterpris: ' + df['squareMeterPrice'].round(0).astype(str)
+                 df['livingArea'].round(0).astype(str) + ', <br />slutpris: ' + df['soldPrice'].round(0).astype(str) + ', kvadratmeterpris: ' + df['squareMeterPrice'].round(0).astype(str)
     locations_name = df['text']
 
     # Create averages DFs
@@ -265,9 +265,10 @@ def create_charts(df):
         x = df_averages_other['months'],
         y=df_averages_other['deals'],
         mode='lines',
-        name='Antal avslut',
+        name='Antal avslut, övriga',
+        text=', övriga',
         stackgroup='one',
-        hoverinfo='x+y',
+        hoverinfo='x+y+text',
         xaxis='x2',
         yaxis='y'
     )
@@ -277,8 +278,9 @@ def create_charts(df):
         y=df_averages_vasastan['deals'],
         mode='lines',
         name='Antal avslut i <br />Vasastan',
+        text=', Vasastan',
         stackgroup='one',
-        hoverinfo='x+y',
+        hoverinfo='x+y+text',
         xaxis='x2',
         yaxis='y'
     )
@@ -288,8 +290,9 @@ def create_charts(df):
         y=df_averages_ostermalm['deals'],
         mode='lines',
         name='Antal avslut i <br />Östermalm',
+        text=', Östermalm',
         stackgroup='one',
-        hoverinfo='x+y',
+        hoverinfo='x+y+text',
         xaxis='x2',
         yaxis='y'
     )
@@ -299,8 +302,9 @@ def create_charts(df):
         y=df_averages_kungsholmen['deals'],
         mode='lines',
         name='Antal avslut i <br />Kungsholmen',
+        text=', Kungsholmen',
         stackgroup='one',
-        hoverinfo='x+y',
+        hoverinfo='x+y+text',
         xaxis='x2',
         yaxis='y'
     )
@@ -311,8 +315,9 @@ def create_charts(df):
         y=df_averages_sodermalm['deals'],
         mode='lines',
         name='Antal avslut i <br />Södermalm',
+        text=', Södermalm',
         stackgroup='one',
-        hoverinfo='x+y',
+        hoverinfo='x+y+text',
         xaxis='x2',
         yaxis='y'
     )
@@ -322,8 +327,9 @@ def create_charts(df):
         y=df_averages_gardet['deals'],
         mode='lines',
         name='Antal avslut i <br />Gärdet',
+        text=', Gärdet',
         stackgroup='one',
-        hoverinfo='x+y',
+        hoverinfo='x+y+text',
         xaxis='x2',
         yaxis='y'
     )
@@ -375,7 +381,7 @@ def create_charts(df):
         xaxis2 = dict(
             #range= df_averages_total['months'].astype(str).tolist(),
             #range=['2015', '2020'],
-            domain = [0.67, 1],
+            domain = [0.68, 1],
             anchor = 'y',
             title = 'Antal avslut'
         ),
@@ -386,7 +392,7 @@ def create_charts(df):
         xaxis3=dict(
             # df_averages_total = df_averages['months'].astype(str).tolist(),
             #range=['2015', '2020'],
-            domain=[0.33, 0.66],
+            domain=[0.33, 0.65],
             anchor='y2',
             title='Snittpriser per stadsdel',
         ),
