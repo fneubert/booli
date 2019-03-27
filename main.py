@@ -340,7 +340,7 @@ def create_charts(df):
     layout = go.Layout(
         title='Sålda objekt i Stockholms innerstad',
         #width=1200,
-        #height=720,
+        height=1200,
         margin=dict(
             t=80,
             l=80,
@@ -348,7 +348,7 @@ def create_charts(df):
             r=80,
             pad=2,
         ),
-        autosize=True,
+        #autosize=True,
         hovermode='closest',
         showlegend=True,
         mapbox=go.layout.Mapbox(
