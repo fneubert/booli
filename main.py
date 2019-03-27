@@ -72,16 +72,12 @@ def create_statistics_table(df):
                 print(area)
                 df_averages = get_averages(df_statistics)
                 if statistic_type == 'price_six_months':
-                    #statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-7]-1)*100).round(2)) + '%'
                     statistic = str(round(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-7]-1)*100), 2)) + '%'
                 elif statistic_type == 'price_twelve_months':
                     statistic = str(round(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-13] - 1) * 100), 2)) + '%'
-                    #statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-13]-1)*100).round(2)) + '%'
                 elif statistic_type == 'price_twntyfour':
-                    #statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-25]-1)*100).round(2)) + '%'
                     statistic = str(round(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-25] - 1) * 100),2)) + '%'
                 col.append(statistic)
-                print(statistic)
             table.append(col)
             #print(table)
 
