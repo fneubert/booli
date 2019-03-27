@@ -60,25 +60,30 @@ def create_statistics_table(df):
     for statistic_type in statistics_list:
         for room in room_type:
             col = []
+            if room == 'all':
+                df_room = df
+            else:
+                df_room = df[df['rooms'] == int(room)]
             for area in areas:
-                if room == 'all':
-                    df_statistics = df
+                if not area == 'Stockholms innerstad':
+                    df_statistics = df_room[df_room['location.namedAreas'].str.contains(area, na=False)]
                 else:
-                    df_statistics = df[df['rooms'] == room]
-                    if not area == 'Stockholms innerstad':
-                        df_statistics = df_statistics[df_statistics['location.namedAreas'].str.contains(area, na=False)]
-                    else:
-                        df_statistics = df_statistics
+                    df_statistics = df_room
+                print(area)
                 df_averages = get_averages(df_statistics)
                 if statistic_type == 'price_six_months':
-                    statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-7]-1)*100).round(2)) + '%'
+                    #statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-7]-1)*100).round(2)) + '%'
+                    statistic = str(round(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-7]-1)*100), 2)) + '%'
                 elif statistic_type == 'price_twelve_months':
-                    statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-13]-1)*100).round(2)) + '%'
+                    statistic = str(round(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-13] - 1) * 100), 2)) + '%'
+                    #statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-13]-1)*100).round(2)) + '%'
                 elif statistic_type == 'price_twntyfour':
-                    statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-25]-1)*100).round(2)) + '%'
+                    #statistic = str(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-25]-1)*100).round(2)) + '%'
+                    statistic = str(round(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-25] - 1) * 100),2)) + '%'
                 col.append(statistic)
+                print(statistic)
             table.append(col)
-                #print(table)
+            #print(table)
 
     header_table = go.Table(
         columnwidth=[1.55, 3, 3, 3],
@@ -360,7 +365,7 @@ def create_charts(df):
             ),
             domain=dict(
                 x=[0,0.49],
-                y=[0.5,1]
+                y=[0.52,1]
             ),
             pitch=0,
             zoom=10,
@@ -372,10 +377,32 @@ def create_charts(df):
             domain = [0, 0.32],
             anchor = 'y2',
             title = 'Snittpriser per rum',
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=6,
+                         label='6m',
+                         step='month',
+                         stepmode='backward'),
+                    dict(count=1,
+                         label='YTD',
+                         step='year',
+                         stepmode='todate'),
+                    dict(count=1,
+                         label='1y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(count=2,
+                         label='2y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(step='all')
+                ])
+            ),
+            type='date'
         ),
         yaxis2 = dict(
             range = [70000,120000],
-            domain = [0, 0.45],
+            domain = [0, 0.48],
             anchor = 'x',
         ),
         xaxis2 = dict(
@@ -383,7 +410,29 @@ def create_charts(df):
             #range=['2015', '2020'],
             domain = [0.68, 1],
             anchor = 'y',
-            title = 'Antal avslut'
+            title = 'Antal avslut',
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=6,
+                         label='6m',
+                         step='month',
+                         stepmode='backward'),
+                    dict(count=1,
+                         label='YTD',
+                         step='year',
+                         stepmode='todate'),
+                    dict(count=1,
+                         label='1y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(count=2,
+                         label='2y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(step='all')
+                ])
+            ),
+            type='date'
         ),
         yaxis = dict(
             domain = [0, 0.45],
@@ -395,10 +444,32 @@ def create_charts(df):
             domain=[0.33, 0.65],
             anchor='y2',
             title='Snittpriser per stadsdel',
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=6,
+                         label='6m',
+                         step='month',
+                         stepmode='backward'),
+                    dict(count=1,
+                         label='YTD',
+                         step='year',
+                         stepmode='todate'),
+                    dict(count=1,
+                         label='1y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(count=2,
+                         label='2y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(step='all')
+                ])
+            ),
+            type='date'
         ),
         yaxis3=dict(
             range=[70000, 120000],
-            domain=[0, 0.45],
+            domain=[0, 0.48],
             anchor='x',
         )
     )
