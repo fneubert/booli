@@ -69,7 +69,7 @@ def create_statistics_table(df):
                     df_statistics = df_room[df_room['location.namedAreas'].str.contains(area, na=False)]
                 else:
                     df_statistics = df_room
-                print(area)
+                #print(area)
                 df_averages = get_averages(df_statistics)
                 if statistic_type == 'price_six_months':
                     statistic = str(round(((df_averages['averagePrices'].iloc[-1] / df_averages['averagePrices'].iloc[-7]-1)*100), 2)) + '%'
@@ -119,7 +119,7 @@ def create_statistics_table(df):
                    align=['left'] + ['right'] * 9,
                    ),
         domain=dict(x=[0.51, 1],
-                    y=[0.45, 0.94])
+                    y=[0.52, 0.94])
     )
 
     return header_table,statistics_table
@@ -341,7 +341,7 @@ def create_charts(df):
     layout = go.Layout(
         title='Sålda objekt i Stockholms innerstad',
         #width=1200,
-        height=1200,
+        #height=1200,
         margin=dict(
             t=80,
             l=80,
@@ -349,7 +349,7 @@ def create_charts(df):
             r=80,
             pad=2,
         ),
-        #autosize=True,
+        autosize=True,
         hovermode='closest',
         showlegend=True,
         mapbox=go.layout.Mapbox(
@@ -360,8 +360,8 @@ def create_charts(df):
                 lon=18.068611
             ),
             domain=dict(
-                x=[0,0.49],
-                y=[0.52,1]
+                x=[0, 0.49],
+                y=[0.52, 1]
             ),
             pitch=0,
             zoom=10,
@@ -398,7 +398,7 @@ def create_charts(df):
         ),
         yaxis2 = dict(
             range = [70000,120000],
-            domain = [0, 0.48],
+            domain = [0, 0.46],
             anchor = 'x',
         ),
         xaxis2 = dict(
@@ -431,7 +431,7 @@ def create_charts(df):
             type='date'
         ),
         yaxis = dict(
-            domain = [0, 0.45],
+            domain = [0, 0.46],
             anchor = 'x2',
         ),
         xaxis3=dict(
@@ -465,7 +465,7 @@ def create_charts(df):
         ),
         yaxis3=dict(
             range=[70000, 120000],
-            domain=[0, 0.48],
+            domain=[0, 0.46],
             anchor='x',
         )
     )
